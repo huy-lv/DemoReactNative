@@ -9,7 +9,8 @@ import {
 	View,
 	Dimensions
 } from 'react-native';
-// import api from '../utils.js';
+import ItemCategory from '../customview/ItemCategory';
+
 import api from '../api/api.js'
 const {width, height} = Dimensions.get('window');
 import * as Progress from 'react-native-progress';
@@ -22,6 +23,8 @@ export default class HomeComponent extends Component {
 		this.state = {
 			text: '',
 			isLoading: false,
+			bookList: '',
+			categories: []
 		}
 	}
 
@@ -31,10 +34,30 @@ export default class HomeComponent extends Component {
 		});
 	}
 
-	componentDidMount() {
-		let that = this;
+	async componentDidMount() {
 		// setTimeout(function(){ that.getMoviesFromApi(); }, 5000);
-		api.getMoviesFromApi(this);
+		// api.getMoviesFromApi(this);
+		let ca = await api.loadHomePage();
+		this.setState({
+			isLoading: false,
+			categories: ca
+		});
+		// console.log("__"+ca);
+	}
+
+	printCategories() {
+		if (!this.state.isLoading) {
+			if (this.state.categories) {
+				return this.state.categories.map((l, i) => {
+					return(
+						<ItemCategory
+							key={i}
+							category={l}/>
+					)
+				});
+			}
+
+		}
 	}
 
 	render() {
@@ -46,9 +69,14 @@ export default class HomeComponent extends Component {
 					hidesWhenStopped={true}
 					animating={this.state.isLoading}
 					color={['red', 'green', 'blue']}
-				    style={{position:'absolute'}}
+					style={{position: 'absolute'}}
 				/>
 				<ScrollView>
+					<View
+						width={width}
+						style={{flexDirection:'row'}}>
+					{this.printCategories()}
+					</View>
 					<Text style={{backgroundColor: 'red'}}>{(this.state.isLoading) ? "1" : "0"}</Text>
 					<Text>{this.state.text}</Text>
 				</ScrollView>
@@ -60,8 +88,7 @@ export default class HomeComponent extends Component {
 
 
 const styles = StyleSheet.create({
-	wrapper: {
-	},
+	wrapper: {},
 	slide1: {
 		flex: 1,
 		justifyContent: 'center',
